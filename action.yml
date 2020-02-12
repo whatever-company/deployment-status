@@ -10,6 +10,8 @@ inputs:
     description: "Log url location"
   environment_url:
     description: "Sets the URL for accessing your environment"
+  environment:
+    description: "Will be used to get the deployment if no deployment_id is given"
   description:
     description: "Descriptive message about the deployment"
   auto_inactive:
@@ -17,7 +19,6 @@ inputs:
     default: "false"
   deployment_id:
     description: "The ID of the deployment"
-    required: true
 runs:
   using: "node12"
   main: "dist/index.js"

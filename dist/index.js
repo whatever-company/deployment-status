@@ -8780,16 +8780,29 @@ function run() {
             const context = github.context;
             const defaultUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}/checks`;
             const token = core.getInput("token", { required: true });
+            const client = new github.GitHub(token, {
+                previews: ["ant-man-preview", "flash-preview"]
+            });
             const url = core.getInput("log_url", { required: false }) || defaultUrl;
             const environmentUrl = core.getInput("environment_url", {
                 required: false
             });
             const description = core.getInput("description", { required: false }) || "";
-            const deploymentId = core.getInput("deployment_id");
             const state = core.getInput("state");
             const autoInactive = core.getInput("auto_inactive", { required: false }) === "true";
-            const client = new github.GitHub(token);
-            yield client.repos.createDeploymentStatus(Object.assign({}, context.repo, { deployment_id: parseInt(deploymentId), state, log_url: url, environment_url: environmentUrl, auto_inactive: autoInactive, description }));
+            const deploymentId = core.getInput("deployment_id", { required: false });
+            const deployments = deploymentId ? [parseInt(deploymentId, 10)] : [];
+            if (deployments.length === 0) {
+                const environment = core.getInput("environment");
+                if (!environment) {
+                    core.setFailed("Please provide an environment");
+                }
+                const { data } = yield client.repos.listDeployments(Object.assign({}, context.repo, { environment }));
+                deployments.push(...data.map(x => x.id));
+            }
+            for (const deploy of deployments) {
+                yield client.repos.createDeploymentStatus(Object.assign({}, context.repo, { deployment_id: deploy, state, log_url: url, environment_url: environmentUrl, auto_inactive: autoInactive, description }));
+            }
         }
         catch (error) {
             core.error(error);
