@@ -6,12 +6,18 @@ inputs:
     description: "State for the deployment"
   token:
     description: "Github repository token"
-  target-url:
-    description: "Target url location"
+  log_url:
+    description: "Log url location"
+  environment_url:
+    description: "Sets the URL for accessing your environment"
   description:
     description: "Descriptive message about the deployment"
+  auto_inactive:
+    description: "Adds a new inactive status to all prior non-transient, non-production environment deployments with the same repository and environment name as the created status's deployment"
+    default: "false"
   deployment_id:
     description: "The ID of the deployment"
+    required: true
 runs:
   using: "node12"
-  main: "lib/main.js"
+  main: "dist/index.js"
